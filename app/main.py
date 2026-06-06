@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.routers import compress, proxy, keys, webhooks
+import os
 
 app = FastAPI(
     title="Headroom API",
@@ -54,16 +57,7 @@ async def health():
     return {"status": "ok", "version": "0.1.0"}
 
 
-@app.get("/", tags=["Health"])
+@app.get("/", tags=["Home"], include_in_schema=False)
 async def root():
-    return {
-        "name": "Headroom API",
-        "docs": "/docs",
-        "version": "0.1.0",
-        "endpoints": {
-            "compress": "POST /v1/compress",
-            "proxy": "POST /v1/proxy/openai/chat/completions",
-            "usage": "GET /v1/keys/usage",
-            "create_key": "POST /v1/keys/",
-        },
-    }
+    static_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "index.html")
+    return FileResponse(static_path)
